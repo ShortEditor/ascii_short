@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ASCII Arts — Gallery & Generator</title>
+  <style>
+    :root{
+      --bg:#0f1724; --card:#0b1220; --muted:#94a3b8; --accent:#7dd3fc;
+      --glass: rgba(255,255,255,0.03);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:radial-gradient(1200px 600px at 10% 10%, rgba(34,197,94,0.06), transparent 5%),
+      linear-gradient(180deg,#071029 0%, var(--bg) 100%);
+      color:#e6eef8; padding:24px;}
+    .container{max-width:1100px;margin:0 auto}
+
+    header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:20px}
+    .brand{display:flex;gap:12px;align-items:center}
+    .logo{width:56px;height:56px;background:linear-gradient(135deg,var(--accent),#60a5fa);display:flex;align-items:center;justify-content:center;border-radius:12px;font-weight:700;color:#012;box-shadow:0 6px 24px rgba(3,7,18,0.6)}
+    h1{font-size:18px;margin:0}
+    p.lead{margin:0;color:var(--muted);font-size:13px}
+
+    .grid{display:grid;grid-template-columns:1fr 360px;gap:20px;align-items:start}
+
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border-radius:12px;padding:16px;box-shadow:0 6px 24px rgba(2,6,23,0.6);border:1px solid rgba(255,255,255,0.03)}
+
+    /* gallery */
+    .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+    .ascii-box{background:var(--card);padding:12px;border-radius:8px;min-height:160px;overflow:auto;font-family: "Courier New", monospace;font-size:10px;line-height:9px;}
+    .ascii-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+    .controls{display:flex;gap:8px;flex-wrap:wrap}
+    button,select,input[type=range]{background:var(--glass);border:1px solid rgba(255,255,255,0.04);color:var(--muted);padding:8px;border-radius:8px}
+    button.primary{background:linear-gradient(90deg,var(--accent),#60a5fa);color:#021124;border:none}
+    .side{position:sticky;top:24px}
+    label{display:block;font-size:12px;color:var(--muted);margin:8px 0 6px}
+
+    .preview{background:#020617;padding:10px;border-radius:6px;min-height:220px;overflow:auto;font-family:monospace;font-size:11px;line-height:10px;white-space:pre}
+    .small{font-size:12px;color:var(--muted)}
+
+    footer{margin-top:22px;color:var(--muted);font-size:13px;text-align:center}
+
+    /* responsive */
+    @media (max-width:900px){.grid{grid-template-columns:1fr} .side{position:static}}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <div class="logo">A</div>
+        <div>
+          <h1>ASCII Arts</h1>
+          <p class="lead">Gallery, converter and tiny editor — all ASCII, no images required.</p>
+        </div>
+      </div>
+      <div class="small">Built with plain HTML, CSS & JS • Ready to host</div>
+    </header>
+
+    <div class="grid">
+      <main>
+        <section class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <div>
+              <strong>Featured ASCII Gallery</strong>
+              <div class="small">Click a sample to load into the editor</div>
+            </div>
+            <div class="controls">
+              <button id="copyBtn">Copy</button>
+              <button id="downloadBtn" class="primary">Download .txt</button>
+            </div>
+          </div>
+
+          <div class="gallery" id="gallery">
+            <!-- Samples injected by JS -->
+          </div>
+
+        </section>
+
+        <section class="card" style="margin-top:14px">
+          <div class="ascii-title"><strong>ASCII Editor / Preview</strong><span class="small" id="meta">chars: 0 • lines: 0</span></div>
+          <div class="preview" id="preview" contenteditable="true" spellcheck="false" aria-label="ASCII preview">
+            <!-- editable ascii content -->
+          </div>
+        </section>
+      </main>
+
+      <aside class="side">
+        <div class="card">
+          <strong>Convert an image → ASCII (client-side)</strong>
+          <div class="small" style="margin-top:6px">Upload a small image and convert it to ASCII art. Works in modern browsers.</div>
+
+          <label for="file">Choose image</label>
+          <input type="file" id="file" accept="image/*">
+
+          <label for="scale">Scale (smaller = blockier)</label>
+          <input type="range" id="scale" min="0.05" max="0.6" step="0.01" value="0.12">
+
+          <label for="charset">Character set</label>
+          <select id="charset">
+            <option value="@%#*+=-:. ">Standard</option>
+            <option value="$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'. ">Detailed</option>
+            <option value="█▓▒░ ">Block</option>
+          </select>
+
+          <label for="invert"><input type="checkbox" id="invert"> Invert brightness</label>
+
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <button id="convertBtn" class="primary">Convert</button>
+            <button id="clearBtn">Clear</button>
+          </div>
+          <hr style="margin:12px 0;border:none;border-top:1px solid rgba(255,255,255,0.03)">
+          <div class="small">Tips:</div>
+          <ul class="small" style="padding-left:18px;margin:8px 0 0;color:var(--muted)">
+            <li>Use simple images with clear contrast.</li>
+            <li>Lower scale for larger art (but slower conversion).</li>
+            <li>After conversion, edit text directly in the preview.</li>
+          </ul>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <strong>Quick actions</strong>
+          <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+            <button id="sampleAll">Load samples</button>
+            <button id="clearAll">Clear</button>
+          </div>
+        </div>
+      </aside>
+
+    </div>
+
+    <footer>
+      Made for ASCII lovers • Edit & host anywhere • Press / for help
+    </footer>
+  </div>
+
+  <canvas id="hiddenCanvas" style="display:none"></canvas>
+
+  <script>
+    // --- Sample ASCII artworks (small, friendly) ---
+    const SAMPLES = [
+      {title:'Smiling Cat', text:`        |\_/|        \n       /     \      \n      /_.~ ~,_\     \n     /  \/^\/  \    \n    (  (o) (o)  )   \n     \   \_/   /    \n      \  ___  /     \n       \/___\/      `},
+      {title:'Mountain', text:`              /\\\n             /  \\\n            /    \\\n           /  /\  \\\n          /  /  \  \\\n         /__/____\__\\\n         \\  \\  /  /
+          \\  \/  /  /
+           \\    /  /
+            \\  /  /
+             \/__/`},
+      {title:'Rocket', text:`         /\n        /  \
+       /++++\
+      /  ()  \
+     /________\
+      |  /\  |
+      | /  \ |
+      |/____\|
+       /_/\_\\`},
+      {title:'Skull', text:`     .-"""-.
+    / -   - \\
+   |  .-. .- |
+   |  \o| |o (
+   \     ^    \
+    '.  )--'  /
+      '-...-'`}
+    ];
+
+    // DOM refs
+    const gallery = document.getElementById('gallery');
+    const preview = document.getElementById('preview');
+    const meta = document.getElementById('meta');
+    const copyBtn = document.getElementById('copyBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const fileInput = document.getElementById('file');
+    const convertBtn = document.getElementById('convertBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const scaleInput = document.getElementById('scale');
+    const charsetSelect = document.getElementById('charset');
+    const invertCheck = document.getElementById('invert');
+    const sampleAllBtn = document.getElementById('sampleAll');
+    const clearAllBtn = document.getElementById('clearAll');
+
+    function updateMeta(){
+      const text = preview.innerText || '';
+      const chars = text.length;
+      const lines = text.split('\n').length;
+      meta.textContent = `chars: ${chars} • lines: ${lines}`;
+    }
+
+    // build gallery
+    function makeSampleCard(s){
+      const card = document.createElement('div');
+      card.className = 'ascii-box';
+      const header = document.createElement('div');
+      header.className = 'ascii-title';
+      header.innerHTML = `<strong style="font-size:13px">${s.title}</strong><button style=\"font-size:12px\">Load</button>`;
+      const pre = document.createElement('pre');
+      pre.style.margin='8px 0 0';
+      pre.style.whiteSpace='pre';
+      pre.textContent = s.text;
+      card.appendChild(header);
+      card.appendChild(pre);
+      header.querySelector('button').addEventListener('click',()=>{
+        preview.textContent = s.text;
+        updateMeta();
+        preview.focus();
+      });
+      return card;
+    }
+
+    function loadSamples(){
+      gallery.innerHTML='';
+      SAMPLES.forEach(s=>gallery.appendChild(makeSampleCard(s)));
+    }
+
+    // clipboard copy
+    copyBtn.addEventListener('click',async()=>{
+      try{
+        await navigator.clipboard.writeText(preview.innerText || '');
+        copyBtn.textContent='Copied!';
+        setTimeout(()=>copyBtn.textContent='Copy',900);
+      }catch(e){
+        copyBtn.textContent='Failed';
+        setTimeout(()=>copyBtn.textContent='Copy',900);
+      }
+    });
+
+    // download
+    downloadBtn.addEventListener('click',()=>{
+      const blob = new Blob([preview.innerText || ''],{type:'text/plain'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'ascii-art.txt';
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    // clear
+    clearBtn.addEventListener('click',()=>{preview.textContent=''; updateMeta();});
+    clearAllBtn.addEventListener('click',()=>{preview.textContent=''; updateMeta();});
+    sampleAllBtn.addEventListener('click',loadSamples);
+
+    // update when user edits
+    preview.addEventListener('input',updateMeta);
+
+    // Image to ASCII converter (simple client-side)
+    function imageToAscii(img, scale, charset, invert){
+      const canvas = document.getElementById('hiddenCanvas');
+      const ctx = canvas.getContext('2d');
+      const w = Math.max(1, Math.floor(img.width * scale));
+      const h = Math.max(1, Math.floor(img.height * scale * 0.5)); // correct font aspect
+      canvas.width = w; canvas.height = h;
+      ctx.drawImage(img, 0, 0, w, h);
+      const data = ctx.getImageData(0,0,w,h).data;
+      let out = '';
+      for(let y=0;y<h;y++){
+        let line='';
+        for(let x=0;x<w;x++){
+          const i = (y*w + x)*4;
+          const r = data[i], g=data[i+1], b=data[i+2];
+          const lum = (0.2126*r + 0.7152*g + 0.0722*b)/255; // 0..1
+          const v = invert ? 1 - lum : lum;
+          const idx = Math.floor((1 - v) * (charset.length - 1));
+          line += charset[idx];
+        }
+        out += line + '\n';
+      }
+      return out;
+    }
+
+    convertBtn.addEventListener('click',()=>{
+      const file = fileInput.files[0];
+      if(!file) return alert('Please choose an image file first.');
+      const reader = new FileReader();
+      reader.onload = (ev)=>{
+        const img = new Image();
+        img.onload = ()=>{
+          const scale = parseFloat(scaleInput.value);
+          const charset = charsetSelect.value;
+          const ascii = imageToAscii(img, scale, charset, invertCheck.checked);
+          preview.textContent = ascii;
+          updateMeta();
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // keyboard help (/) to insert a small help overlay
+    document.addEventListener('keydown', (e)=>{
+      if(e.key === '/'){
+        e.preventDefault();
+        alert('Keyboard shortcuts:\n\nCtrl/Cmd + C: copy selected text\nCtrl/Cmd + A: select all\nUse preview area to edit ASCII directly.');
+      }
+    });
+
+    // initial
+    loadSamples();
+    preview.textContent = SAMPLES[0].text;
+    updateMeta();
+
+    // accessibility: focus style
+    document.addEventListener('focusin', (e)=>{e.target.style.outline='2px solid rgba(125,211,252,0.15)';});
+    document.addEventListener('focusout', (e)=>{e.target.style.outline='none';});
+  </script>
+</body>
+</html>
